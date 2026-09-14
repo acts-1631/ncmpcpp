@@ -96,6 +96,7 @@ noinst_HEADERS = \
 	utility/storage_kind.h \
 	utility/shared_resource.h \
 	utility/string.h \
+	utility/transform_iterator.h \
 	utility/type_conversions.h \
 	utility/wide_string.h \
 	bindings.h \

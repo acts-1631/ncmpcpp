@@ -2,6 +2,7 @@
 * Update lyrics fetchers.
 * Add support for hexadecimal HTML escape codes.
 * Remove support for fetching lyrics from genius.com.
+* Fix compilation with `libc++` >= 22.
 
 # ncmpcpp-0.10.1 (2024-10-24)
 * Fix compilation with `libc++`.
