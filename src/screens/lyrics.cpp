@@ -119,7 +119,7 @@ bool saveLyrics(const std::string &filename, const std::string &lyrics)
 		return false;
 }
 
-boost::optional<std::string> downloadLyrics(
+std::optional<std::string> downloadLyrics(
 	const MPD::Song &s,
 	std::shared_ptr<Shared<NC::Buffer>> shared_buffer,
 	std::shared_ptr<std::atomic<bool>> download_stopper,
@@ -172,7 +172,7 @@ boost::optional<std::string> downloadLyrics(
 		for (auto &fetcher : Config.lyrics_fetchers)
 		{
 			if (download_stopper && download_stopper->load())
-				return boost::none;
+				return std::nullopt;
 			fetcher_result = fetch_lyrics(fetcher);
 			if (fetcher_result.first)
 				break;
@@ -181,7 +181,7 @@ boost::optional<std::string> downloadLyrics(
 	else
 		fetcher_result = fetch_lyrics(current_fetcher);
 
-	boost::optional<std::string> result;
+	std::optional<std::string> result;
 	if (fetcher_result.first)
 		result = std::move(fetcher_result.second);
 	return result;
@@ -217,9 +217,9 @@ void Lyrics::update()
 			m_refresh_window = true;
 		}
 
-		if (m_worker.is_ready())
+		if (m_worker.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
 		{
-			auto lyrics = m_worker.get();
+                        auto lyrics = m_worker.get();
 			if (lyrics)
 			{
 				w.clear();
@@ -290,8 +290,8 @@ void Lyrics::fetch(const MPD::Song &s)
 		{
 			m_download_stopper = std::make_shared<std::atomic<bool>>(false);
 			m_shared_buffer = std::make_shared<Shared<NC::Buffer>>();
-			m_worker = boost::async(
-				boost::launch::async,
+			m_worker = std::async(
+				std::launch::async,
 				std::bind(downloadLyrics,
 				          m_song, m_shared_buffer, m_download_stopper, m_fetcher));
 		}
@@ -431,14 +431,14 @@ void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 	}
 }
 
-boost::optional<std::string> Lyrics::tryTakeConsumerMessage()
+std::optional<std::string> Lyrics::tryTakeConsumerMessage()
 {
-	boost::optional<std::string> result;
+	std::optional<std::string> result;
 	auto consumer = m_consumer_state.acquire();
 	if (consumer->message)
 	{
 		result = std::move(consumer->message);
-		consumer->message = boost::none;
+		consumer->message = std::nullopt;
 	}
 	return result;
 }
@@ -446,7 +446,7 @@ boost::optional<std::string> Lyrics::tryTakeConsumerMessage()
 void Lyrics::clearWorker()
 {
 	m_shared_buffer.reset();
-	m_worker = boost::BOOST_THREAD_FUTURE<boost::optional<std::string>>();
+	m_worker = std::future<std::optional<std::string>>();
 }
 
 void Lyrics::stopDownload()

@@ -22,8 +22,8 @@
 #define NCMPCPP_LYRICS_H
 
 #include <atomic>
-#include <boost/optional.hpp>
-#include <boost/thread/future.hpp>
+#include <optional>
+#include <future>
 #include <memory>
 #include <queue>
 
@@ -56,7 +56,7 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	void toggleFetcher();
 
 	void fetchInBackground(const MPD::Song &s, bool notify_);
-	boost::optional<std::string> tryTakeConsumerMessage();
+	std::optional<std::string> tryTakeConsumerMessage();
 
 private:
 	struct ConsumerState
@@ -85,7 +85,7 @@ private:
 
 		bool running;
 		std::queue<Song> songs;
-		boost::optional<std::string> message;
+		std::optional<std::string> message;
 	};
 
 	void clearWorker();
@@ -99,7 +99,7 @@ private:
 
 	MPD::Song m_song;
 	LyricsFetcher *m_fetcher;
-	boost::BOOST_THREAD_FUTURE<boost::optional<std::string>> m_worker;
+	std::future<std::optional<std::string>> m_worker;
 
 	Shared<ConsumerState> m_consumer_state;
 };
